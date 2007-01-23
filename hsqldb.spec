@@ -20,7 +20,15 @@ BuildRequires:	jpackage-utils >= 0:1.5
 BuildRequires:	junit
 BuildRequires:	rpmbuild(macros) >= 1.300
 BuildRequires:	servletapi4
+Requires(postun):	/usr/sbin/groupdel
+Requires(postun):	/usr/sbin/userdel
+Requires(pre):	/bin/id
+Requires(pre):	/usr/bin/getgid
+Requires(pre):	/usr/sbin/groupadd
+Requires(pre):	/usr/sbin/useradd
 Requires:	servletapi4
+Provides:	group(hsqldb)
+Provides:	user(hsqldb)
 Buildarch:	noarch
 Buildroot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -65,9 +73,9 @@ unzip -q %{SOURCE0}
 )
 
 # set right permissions
-find . -name "*.sh" -exec chmod 755 \{\} \;
+find . -name "*.sh" -exec chmod 755 {} \;
 # remove all _notes directories
-for dir in `find . -name _notes`; do rm -rf $dir; done
+for dir in $(find -name _notes); do rm -rf $dir; done
 # remove all binary libs
 find . -name "*.jar" -exec rm -f {} \;
 find . -name "*.class" -exec rm -f {} \;
@@ -143,9 +151,8 @@ rm -rf $RPM_BUILD_ROOT
 %pre
 # Add the "hsqldb" user and group
 # we need a shell to be able to use su - later
-%{_sbindir}/groupadd %{name} 2> /dev/null || :
-%{_sbindir}/useradd -g %{name} \
-    -s /bin/sh -d %{_localstatedir}/lib/%{name} %{name} 2> /dev/null || :
+%groupadd -g 169 %{name}
+%useradd -u 169 -g %{name} -s /bin/sh -d %{_localstatedir}/lib/%{name} %{name}
 
 %post
 rm -f %{_localstatedir}/lib/%{name}/lib/hsqldb.jar
@@ -159,8 +166,8 @@ rm -f %{_localstatedir}/lib/%{name}/lib/servlet.jar
 if [ "$1" = "0" ]; then
 	rm -f %{_localstatedir}/lib/%{name}/lib/hsqldb.jar
 	rm -f %{_localstatedir}/lib/%{name}/lib/servlet.jar
-	%{_sbindir}/userdel %{name} >> /dev/null 2>&1 || :
-	%{_sbindir}/groupdel %{name} >> /dev/null 2>&1 || :
+	%userremove %{name}
+	%groupremove %{name}
 fi
 
 %post javadoc
