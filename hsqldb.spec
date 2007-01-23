@@ -12,9 +12,10 @@ Source2:	%{name}-standard-server.properties
 Source3:	%{name}-standard-webserver.properties
 Source4:	%{name}-standard-sqltool.rc
 Patch0:		%{name}-scripts.patch
-Patch1:		%{name}-build_xml.patch
+#Patch1: %{name}-build_xml.patch
 Group:		Development/Languages/Java
 BuildRequires:	ant
+BuildRequires:	jdk
 BuildRequires:	jpackage-utils >= 0:1.5
 BuildRequires:	junit
 BuildRequires:	rpmbuild(macros) >= 1.300
@@ -76,16 +77,17 @@ find . -name "*.war" -exec rm -f {} \;
 chmod -R go=u-w *
 
 %patch0
-%patch1
+#%patch1
 
 %build
 export CLASSPATH=$(build-classpath \
-jsse/jsse \
-jsse/jnet \
-jsse/jcert \
-jdbc-stdext \
-servletapi4 \
-junit)
+	jsse/jsse \
+	jsse/jnet \
+	jsse/jcert \
+	java/jdbc-stdext \
+	servletapi4 \
+	junit \
+)
 cd build
 %ant jar javadoc
 
