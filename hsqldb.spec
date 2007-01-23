@@ -104,8 +104,8 @@ install -d $RPM_BUILD_ROOT%{_bindir}
 install bin/runUtil.sh $RPM_BUILD_ROOT%{_bindir}/%{name}RunUtil
 
 # sysv init
-install -d $RPM_BUILD_ROOT%{_sysconfdir}/init.d
-install bin/%{name} $RPM_BUILD_ROOT%{_sysconfdir}/init.d/%{name}
+install -d $RPM_BUILD_ROOT/etc/rc.d/init.d
+install bin/%{name} $RPM_BUILD_ROOT/etc/rc.d/init.d/%{name}
 
 # config
 install -d $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig
@@ -125,10 +125,13 @@ install -d $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}/data
 install -d $RPM_BUILD_ROOT%{_datadir}/%{name}/demo
 install demo/*.sh 	$RPM_BUILD_ROOT%{_datadir}/%{name}/demo
 install demo/*.html 	$RPM_BUILD_ROOT%{_datadir}/%{name}/demo
+
 # javadoc
 install -d $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
 cp -r doc/src/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
+# FIXME: re-entrancy
 rm -rf doc/src
+
 # manual
 install -d $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}/doc
 cp -r doc/* $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}
