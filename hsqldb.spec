@@ -1,10 +1,11 @@
 %define		_ver	%(echo %{version} | tr . _)
 Summary:	SQL relational database engine written in Java
+Summary(pl):	Silnik relacyjnych baz danych SQL napisany w Javie
 Name:		hsqldb
 Version:	1.8.0.7
 Release:	0.1
 License:	BSD Style
-URL:		http://www.hsqldb.org/
+Group:		Development/Languages/Java
 Source0:	http://dl.sourceforge.net/hsqldb/%{name}_%{_ver}.zip
 # Source0-md5:	d7ae87f80599e740c2590cd43341c075
 Source1:	%{name}-standard.cfg
@@ -12,8 +13,8 @@ Source2:	%{name}-standard-server.properties
 Source3:	%{name}-standard-webserver.properties
 Source4:	%{name}-standard-sqltool.rc
 Patch0:		%{name}-scripts.patch
-#Patch1: %{name}-build_xml.patch
-Group:		Development/Languages/Java
+#Patch1:	%{name}-build_xml.patch
+URL:		http://www.hsqldb.org/
 BuildRequires:	ant
 BuildRequires:	jdk
 BuildRequires:	jpackage-utils >= 0:1.5
@@ -44,33 +45,54 @@ Additionally, it includes tools such as a minimal web server,
 in-memory query and management tools (can be run as applets) and a
 number of demonstration examples.
 
+%description -l pl
+HSQLDB to wiod±cy silnik relacyjnych baz danych SQL napisany w Javie.
+Ma sterownik JDBC i obs³uguje znaczny podzbiór ANSI-92 SQL (w formacie
+drzew BNF) oraz rozszerzenia SQL 99 i 2003. Oferuje ma³y (poni¿ej 100k
+w jednej wersji dla apletów), szybki silnik obs³uguj±cy tabele zarówno
+w pamiêci, jak i na dysku; obs³uguje tryb wbudowany oraz serwerowy.
+
+Ponadto zawiera narzêdzia takie jak minimalny serwer WWW, zapytania w
+pamiêci i narzêdzia zarz±dzaj±ce (mog±ce dzia³aæ jako aplety) oraz
+wiele przyk³adów demonstracyjnych.
+
 %package manual
-Summary:	Manual for %{name}
+Summary:	Manual for HSQLDB
+Summary(pl):	Podrêcznik do HSQLDB
 Group:		Development/Languages/Java
 
 %description manual
-Documentation for %{name}.
+Documentation for HSQLDB.
+
+%description manual -l pl
+Podrêcznik do HSQLDB.
 
 %package javadoc
-Summary:	Javadoc for %{name}
+Summary:	Javadoc for HSQLDB
+Summary(pl):	Dokumentacja javadoc do HSQLDB
 Group:		Development/Languages/Java
 
 %description javadoc
-Javadoc for %{name}.
+Javadoc for HSQLDB.
+
+%description javadoc -l pl
+Dokumentacja javadoc do HSQLDB.
 
 %package demo
-Summary:	Demo for %{name}
+Summary:	Demo for HSQLDB
+Summary(pl):	Pliki demonstracyjne dla HSQLDB
 Group:		Development/Languages/Java
 Requires:	%{name} = %{epoch}:%{version}-%{release}
 
 %description demo
-Demonstrations and samples for %{name}.
+Demonstrations and samples for HSQLDB.
+
+%description demo -l pl
+Programy demonstracyjne i przyk³adowe dla HSQLDB.
 
 %prep
 %setup -q -T -c -n %{name}
-(cd ..
-unzip -q %{SOURCE0}
-)
+unzip -q %{SOURCE0} -d ..
 
 # set right permissions
 find . -name "*.sh" -exec chmod 755 {} \;
@@ -105,7 +127,10 @@ rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT%{_javadir}
 install lib/%{name}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
 
-(cd $RPM_BUILD_ROOT%{_javadir} && for jar in *-%{version}.jar; do ln -sf ${jar} ${jar/-%{version}/}; done)
+cd $RPM_BUILD_ROOT%{_javadir}
+# FIXME: bashism
+for jar in *-%{version}.jar; do ln -sf ${jar} ${jar/-%{version}/}; done
+cd -
 
 # bin
 install -d $RPM_BUILD_ROOT%{_bindir}
