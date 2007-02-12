@@ -1,6 +1,6 @@
 %define		_ver	%(echo %{version} | tr . _)
 Summary:	SQL relational database engine written in Java
-Summary(pl.UTF-8):   Silnik relacyjnych baz danych SQL napisany w Javie
+Summary(pl.UTF-8):	Silnik relacyjnych baz danych SQL napisany w Javie
 Name:		hsqldb
 Version:	1.8.0.7
 Release:	0.1
@@ -58,7 +58,7 @@ wiele przykładów demonstracyjnych.
 
 %package manual
 Summary:	Manual for HSQLDB
-Summary(pl.UTF-8):   Podręcznik do HSQLDB
+Summary(pl.UTF-8):	Podręcznik do HSQLDB
 Group:		Development/Languages/Java
 
 %description manual
@@ -69,7 +69,7 @@ Podręcznik do HSQLDB.
 
 %package javadoc
 Summary:	Javadoc for HSQLDB
-Summary(pl.UTF-8):   Dokumentacja javadoc do HSQLDB
+Summary(pl.UTF-8):	Dokumentacja javadoc do HSQLDB
 Group:		Development/Languages/Java
 
 %description javadoc
@@ -80,7 +80,7 @@ Dokumentacja javadoc do HSQLDB.
 
 %package demo
 Summary:	Demo for HSQLDB
-Summary(pl.UTF-8):   Pliki demonstracyjne dla HSQLDB
+Summary(pl.UTF-8):	Pliki demonstracyjne dla HSQLDB
 Group:		Development/Languages/Java
 Requires:	%{name} = %{epoch}:%{version}-%{release}
 
