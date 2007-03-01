@@ -1,11 +1,17 @@
+#
 # TODO
 # - make build with java 1.6
+# - separate server
+#
+# Conditional build:
+%bcond_without	binary		# do not use binary jar, but compile (needs java < 1.6)
+#
 %define		_ver	%(echo %{version} | tr . _)
 Summary:	SQL relational database engine written in Java
 Summary(pl.UTF-8):	Silnik relacyjnych baz danych SQL napisany w Javie
 Name:		hsqldb
 Version:	1.8.0.7
-Release:	0.2
+Release:	0.3
 License:	BSD Style
 Group:		Development/Languages/Java
 Source0:	http://dl.sourceforge.net/hsqldb/%{name}_%{_ver}.zip
@@ -19,6 +25,7 @@ Patch0:		%{name}-scripts.patch
 URL:		http://www.hsqldb.org/
 BuildRequires:	ant
 BuildRequires:	jdk
+%{!?with_binary:BuildRequires:	jdk < 1.6}
 BuildRequires:	jpackage-utils >= 0:1.5
 BuildRequires:	junit
 BuildRequires:	rpmbuild(macros) >= 1.300
@@ -98,7 +105,8 @@ Programy demonstracyjne i przykładowe dla HSQLDB.
 #%patch1
 
 # remove all binary libs
-find . -name '*.jar' -o -name '*.class' -o -name '*.war' | xargs rm -vf
+%{!?with_binary:rm -f lib/hsqldb.jar}
+rm -f lib/servlet.jar
 
 cp -a doc manual
 rm -rf manual/src
@@ -114,7 +122,7 @@ export CLASSPATH=$(build-classpath \
 	junit \
 )
 cd build
-%ant jar javadoc
+%ant %{!?with_binary:jar} javadoc
 
 %install
 rm -rf $RPM_BUILD_ROOT
