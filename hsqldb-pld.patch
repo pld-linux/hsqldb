@@ -1,0 +1,57 @@
+--- hsqldb/bin/hsqldb~	2005-08-02 01:30:06.000000000 +0300
++++ hsqldb/bin/hsqldb	2007-03-02 00:10:29.442888741 +0200
+@@ -89,6 +89,8 @@
+ 
+ #  -- blaine.simpson@admc.com
+ 
++. /etc/rc.d/init.d/functions
++
+ set +u
+ 
+ # This is only used for recursive invocations.
+@@ -101,7 +103,7 @@
+ }
+ [ -n "$INVOC_PATH" ] && INVOC_PATH="${INVOC_PATH}/"
+ 
+-SYNTAX_MSG="SYNTAX:  ${INVOC_PATH}hsqldb start|stop|stopcompact|restart|restartcmpacted|status"
++SYNTAX_MSG="$0 start|stop|stopcompact|restart|restartcmpacted|status"
+ 
+ # You can override any of these default values in your config file:
+ 
+@@ -110,7 +112,7 @@
+ SU_ECHO_SECS=1
+ # File used as semaphore.  If file is removed, a running pid checker
+ # process will exit.
+-PIDCHECKER_FLAGFILE=/tmp/pidchecker.run
++PIDCHECKER_FLAGFILE=/var/run/hsqldb.pidchecker
+ # The following settings get overridden by optional setting in the config file.
+ # Time to allow for JVM to die after all HSQLDB instances stopped.
+ MAX_TERMINATE_SECS=1
+@@ -175,7 +177,7 @@
+ }
+ 
+ [ $# -eq 1 ] || {
+-    echo "$SYNTAX_MSG" 1>&2
++    msg_usage "$SYNTAX_MSG"
+     exit 4
+ }
+ 
+@@ -262,9 +264,6 @@
+     exit 2
+ }
+ 
+-# "chown" lives here on some UNIXes.
+-PATH="$PATH:/usr/sbin"
+-
+ # Make a good effort (but not bullet-proof) check on permissions of the
+ # auth file.  Unfortunately, if auth-file is not specified, this depends
+ # upon both (a) $HOME being set; and (b) SqlToolSprayer and SqlTool defaults.
+@@ -468,7 +467,7 @@
+         exec "${INVOC_PATH}"/hsqldb start
+     ;;
+     *)
+-        echo "$SYNTAX_MSG" 1>&2
++        msg_usage "$SYNTAX_MSG"
+         exit 5
+     ;;
+ esac
