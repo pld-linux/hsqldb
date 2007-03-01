@@ -1,5 +1,5 @@
---- hsqldb/bin/hsqldb	2007-03-02 00:10:29.442888741 +0200
-+++ hsqldb/bin/hsqldb	2007-03-02 00:22:17.468759551 +0200
+--- hsqldb/bin/hsqldb	2007-03-02 00:22:17.468759551 +0200
++++ hsqldb/bin/hsqldb	2007-03-02 00:28:05.686547133 +0200
 @@ -89,6 +89,8 @@
  
  #  -- blaine.simpson@admc.com
@@ -46,7 +46,7 @@
  # Make a good effort (but not bullet-proof) check on permissions of the
  # auth file.  Unfortunately, if auth-file is not specified, this depends
  # upon both (a) $HOME being set; and (b) SqlToolSprayer and SqlTool defaults.
-@@ -347,6 +346,12 @@
+@@ -347,8 +346,17 @@
              org.hsqldb.util.SqlToolSprayer --
      ;;
      start)
@@ -56,18 +56,56 @@
 +            exit 0
 +        fi
 +
++        msg_starting hsqldb; busy; echo
++
          [ -n "$HSQLDB_PID" ] && {
-         echo "There is already a hsqldb server running with pid $HSQLDB_PID." 1>&2
+-        echo "There is already a hsqldb server running with pid $HSQLDB_PID." 1>&2
++            fail
++            echo "There is already a hsqldb server running with pid $HSQLDB_PID." 1>&2
              exit 1
-@@ -423,6 +428,7 @@
+         }
+         TLS_SWITCHES=
+@@ -356,10 +364,12 @@
+         TLS_SWITCHES="-Djavax.net.ssl.keyStore=$TLS_KEYSTORE -Djavax.net.ssl.keyStorePassword=$TLS_PASSWORD"
+         if [ -n "$HSQLDB_OWNER" ]; then
+             touch "$PIDFILE" || {
++                fail
+                 echo "Failed to create pid file" 1>&2
+                 exit 1
+             }
+             chown "$HSQLDB_OWNER" "$PIDFILE" || {
++                fail
+                 echo "Failed to chown pid file to '$HSQLDB_OWNER'" 1>&2
+                 exit 1
+             }
+@@ -369,6 +379,7 @@
+             nohup su "$HSQLDB_OWNER" -c "cd '$SERVER_HOME' && echo "'$$'" > '$PIDFILE' && exec '$JAVA_EXECUTABLE' $SERVER_JVMARGS $TLS_SWITCHES -classpath '${SERVER_ADDL_CLASSPATH}${HSQLDB_JAR_PATH}' org.hsqldb.util.MainInvoker org.hsqldb.$TARGET_CLASS $INVOC_ADDL_ARGS" >> "$LOGFILE" 2>&1 &
+         else
+             cd "$SERVER_HOME" || {
++                fail
+                 echo "Failed to cd to '$SERVER_HOME'" 1>&2
+                 exit 1
+             }
+@@ -400,6 +411,7 @@
+         # There are many reasons why we could fail to read the pid file,
+         # but regardless of why, the pid file does not contain a valid pid.
+         touch "$PIDCHECKER_FLAGFILE" || {
++            fail
+             echo "Failed to touch file '$PIDCHECKER_FLAGFILE'" 1>&2
+             exit 1
+         }
+@@ -423,14 +435,24 @@
              org.hsqldb.util.SqlToolSprayer -- && {
              rm -f "$PIDCHECKER_FLAGFILE"
              echo "org.hsqldb.$TARGET_CLASS started with pid `cat $PIDFILE`"
++            ok
 +            touch /var/lock/subsys/hsqldb
              exit 0
          }
          rm -f "$PIDCHECKER_FLAGFILE"
-@@ -431,6 +437,11 @@
++        fail
+         echo "Failed to start org.hsqldb.$TARGET_CLASS.
+ See log file '$LOGFILE'." 1>&2
          exit 1
      ;;
      stop|stopcompact)
@@ -76,10 +114,23 @@
 +            exit 0
 +        fi
 +
++        msg_stopping hsqldb; busy; echo
++
          [ "$COMMAND" = stopcompact ] && SHUTDOWN_OPTION='compact'
          [ -n "$HSQLDB_PID" ] || {
              echo "I don't know of any running hsqldb server." 1>&2
-@@ -462,13 +473,18 @@
+@@ -454,21 +476,29 @@
++            fail
+             echo "WARNING:  hsqldb is still running!" 1>&2
+             exit 1
+         }
+         rm -f "$PIDFILE" || {
++            fail
+             echo "Failed to remove pid file '$PIDFILE'" 1>&2
+             exit 1
+         }
+         echo "Successful shutdown ${SHUTDOWN_OPTION} (for the $TARGET_CLASS process)!"
++        ok
 +        rm -f /var/lock/subsys/hsqldb
          exit 0
      ;;
