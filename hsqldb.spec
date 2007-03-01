@@ -220,6 +220,7 @@ fi
 %attr(755,root,root) %{_bindir}/*
 %attr(754,root,root) /etc/rc.d/init.d/%{name}
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/%{name}
+%dir %{_localstatedir}/lib/%{name}
 %attr(755,hsqldb,hsqldb) %{_localstatedir}/lib/%{name}/data
 %{_localstatedir}/lib/%{name}/lib
 %{_localstatedir}/lib/%{name}/server.properties
