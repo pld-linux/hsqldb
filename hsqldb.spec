@@ -9,7 +9,7 @@ Summary:	SQL relational database engine written in Java
 Summary(pl.UTF-8):	Silnik relacyjnych baz danych SQL napisany w Javie
 Name:		hsqldb
 Version:	1.8.0.7
-Release:	0.4
+Release:	0.6
 License:	BSD Style
 Group:		Development/Languages/Java
 Source0:	http://dl.sourceforge.net/hsqldb/%{name}_%{_ver}.zip
@@ -19,7 +19,7 @@ Source2:	%{name}-standard-server.properties
 Source3:	%{name}-standard-webserver.properties
 Source4:	%{name}-standard-sqltool.rc
 Patch0:		%{name}-scripts.patch
-#Patch1:	%{name}-build_xml.patch
+Patch1:		%{name}-pld.patch
 URL:		http://www.hsqldb.org/
 BuildRequires:	ant
 BuildRequires:	jdk
@@ -92,6 +92,7 @@ Programy demonstracyjne i przykładowe dla HSQLDB.
 %package server
 Summary:	HSQLDB server
 Group:		Applications/Databases
+Requires(post,preun):	/sbin/chkconfig
 Requires(postun):	/usr/sbin/groupdel
 Requires(postun):	/usr/sbin/userdel
 Requires(pre):	/bin/id
@@ -99,6 +100,7 @@ Requires(pre):	/usr/bin/getgid
 Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
 Requires:	%{name} = %{epoch}:%{version}-%{release}
+Requires:	rc-scripts
 Requires:	servletapi4
 Provides:	group(hsqldb)
 Provides:	user(hsqldb)
@@ -109,8 +111,8 @@ HSQLDB server.
 
 %prep
 %setup -q -n %{name}
-%patch0
-#%patch1
+%patch0 -p0
+%patch1 -p1
 
 # remove all binary libs
 %{!?with_binary:rm -f lib/hsqldb.jar}
@@ -178,12 +180,18 @@ rm -rf $RPM_BUILD_ROOT
 %useradd -u 169 -g %{name} -s /bin/sh -d %{_localstatedir}/lib/%{name} %{name}
 
 %post server
-ln -sf $(build-classpath hsqldb) %{_localstatedir}/lib/%{name}/lib/hsqldb.jar
 ln -sf $(build-classpath servletapi4) %{_localstatedir}/lib/%{name}/lib/servlet.jar
+/sbin/chkconfig --add %{name}
+%service %{name} restart
 
 %preun server
 if [ "$1" = "0" ]; then
-	rm -f %{_localstatedir}/lib/%{name}/lib/hsqldb.jar
+	%service -q %{name} stop
+	/sbin/chkconfig --del %{name}
+fi
+
+%postun server
+if [ "$1" = "0" ]; then
 	rm -f %{_localstatedir}/lib/%{name}/lib/servlet.jar
 	%userremove %{name}
 	%groupremove %{name}
