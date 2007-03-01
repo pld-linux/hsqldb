@@ -1,5 +1,5 @@
---- hsqldb/bin/hsqldb~	2005-08-02 01:30:06.000000000 +0300
-+++ hsqldb/bin/hsqldb	2007-03-02 00:10:29.442888741 +0200
+--- hsqldb/bin/hsqldb	2007-03-02 00:10:29.442888741 +0200
++++ hsqldb/bin/hsqldb	2007-03-02 00:22:17.468759551 +0200
 @@ -89,6 +89,8 @@
  
  #  -- blaine.simpson@admc.com
@@ -46,7 +46,52 @@
  # Make a good effort (but not bullet-proof) check on permissions of the
  # auth file.  Unfortunately, if auth-file is not specified, this depends
  # upon both (a) $HOME being set; and (b) SqlToolSprayer and SqlTool defaults.
-@@ -468,7 +467,7 @@
+@@ -347,6 +346,12 @@
+             org.hsqldb.util.SqlToolSprayer --
+     ;;
+     start)
++        # Check if the service is already running?
++        if [ -f /var/lock/subsys/hsqldb ]; then
++            msg_already_running hsqldb
++            exit 0
++        fi
++
+         [ -n "$HSQLDB_PID" ] && {
+         echo "There is already a hsqldb server running with pid $HSQLDB_PID." 1>&2
+             exit 1
+@@ -423,6 +428,7 @@
+             org.hsqldb.util.SqlToolSprayer -- && {
+             rm -f "$PIDCHECKER_FLAGFILE"
+             echo "org.hsqldb.$TARGET_CLASS started with pid `cat $PIDFILE`"
++            touch /var/lock/subsys/hsqldb
+             exit 0
+         }
+         rm -f "$PIDCHECKER_FLAGFILE"
+@@ -431,6 +437,11 @@
+         exit 1
+     ;;
+     stop|stopcompact)
++        if [ ! -f /var/lock/subsys/hsqldb ]; then
++            msg_not_running hsqldb
++            exit 0
++        fi
++
+         [ "$COMMAND" = stopcompact ] && SHUTDOWN_OPTION='compact'
+         [ -n "$HSQLDB_PID" ] || {
+             echo "I don't know of any running hsqldb server." 1>&2
+@@ -462,13 +473,18 @@
++        rm -f /var/lock/subsys/hsqldb
+         exit 0
+     ;;
+     restart|restartcompacted)
+-        STOP_COMMAND=stop
+-        [ "$COMMAND" = restartcompacted ] && STOP_COMMAND=stopcompact
+-        "${INVOC_PATH}"hsqldb $STOP_COMMAND || exit $?
++        if [ -f /var/lock/subsys/hsqldb ]; then
++            STOP_COMMAND=stop
++            [ "$COMMAND" = restartcompacted ] && STOP_COMMAND=stopcompact
++            "${INVOC_PATH}"hsqldb $STOP_COMMAND || exit $?
++        fi
          exec "${INVOC_PATH}"/hsqldb start
      ;;
      *)
@@ -55,3 +100,5 @@
          exit 5
      ;;
  esac
++
++# vim:ts=4:sw=4:et
