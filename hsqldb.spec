@@ -1,9 +1,11 @@
+# TODO
+# - make build with java 1.6
 %define		_ver	%(echo %{version} | tr . _)
 Summary:	SQL relational database engine written in Java
 Summary(pl.UTF-8):	Silnik relacyjnych baz danych SQL napisany w Javie
 Name:		hsqldb
 Version:	1.8.0.7
-Release:	0.1
+Release:	0.2
 License:	BSD Style
 Group:		Development/Languages/Java
 Source0:	http://dl.sourceforge.net/hsqldb/%{name}_%{_ver}.zip
@@ -91,23 +93,16 @@ Demonstrations and samples for HSQLDB.
 Programy demonstracyjne i przykładowe dla HSQLDB.
 
 %prep
-%setup -q -T -c -n %{name}
-unzip -q %{SOURCE0} -d ..
-
-# set right permissions
-find . -name "*.sh" -exec chmod 755 {} \;
-# remove all _notes directories
-for dir in $(find -name _notes); do rm -rf $dir; done
-# remove all binary libs
-find . -name "*.jar" -exec rm -f {} \;
-find . -name "*.class" -exec rm -f {} \;
-find . -name "*.war" -exec rm -f {} \;
-
-# correct silly permissions
-chmod -R go=u-w *
-
+%setup -q -n %{name}
 %patch0
 #%patch1
+
+# remove all binary libs
+find . -name '*.jar' -o -name '*.class' -o -name '*.war' | xargs rm -vf
+
+cp -a doc manual
+rm -rf manual/src
+cp -a index.html manual
 
 %build
 export CLASSPATH=$(build-classpath \
@@ -126,11 +121,7 @@ rm -rf $RPM_BUILD_ROOT
 # jar
 install -d $RPM_BUILD_ROOT%{_javadir}
 install lib/%{name}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
-
-cd $RPM_BUILD_ROOT%{_javadir}
-# FIXME: bashism
-for jar in *-%{version}.jar; do ln -sf ${jar} ${jar/-%{version}/}; done
-cd -
+ln -s  %{name}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}.jar
 
 # bin
 install -d $RPM_BUILD_ROOT%{_bindir}
@@ -161,31 +152,18 @@ install demo/*.html 	$RPM_BUILD_ROOT%{_datadir}/%{name}/demo
 
 # javadoc
 install -d $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-cp -r doc/src/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-# FIXME: re-entrancy
-rm -rf doc/src
-
-# manual
-install -d $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}/doc
-cp -r doc/* $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}
-cp index.html $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}
+cp -a doc/src/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %pre
-# Add the "hsqldb" user and group
-# we need a shell to be able to use su - later
 %groupadd -g 169 %{name}
 %useradd -u 169 -g %{name} -s /bin/sh -d %{_localstatedir}/lib/%{name} %{name}
 
 %post
-rm -f %{_localstatedir}/lib/%{name}/lib/hsqldb.jar
-rm -f %{_localstatedir}/lib/%{name}/lib/servlet.jar
-(cd %{_localstatedir}/lib/%{name}/lib
-    ln -s $(build-classpath hsqldb) hsqldb.jar
-    ln -s $(build-classpath servletapi4) servlet.jar
-)
+ln -sf $(build-classpath hsqldb) %{_localstatedir}/lib/%{name}/lib/hsqldb.jar
+ln -sf $(build-classpath servletapi4) %{_localstatedir}/lib/%{name}/lib/servlet.jar
 
 %preun
 if [ "$1" = "0" ]; then
@@ -206,7 +184,7 @@ fi
 
 %files
 %defattr(644,root,root,755)
-%doc %{_docdir}/%{name}-%{version}/hsqldb_lic.txt
+%doc doc/hsqldb_lic.txt
 %{_javadir}/*
 %attr(755,root,root) %{_bindir}/*
 %attr(754,root,root) /etc/rc.d/init.d/%{name}
@@ -219,7 +197,7 @@ fi
 
 %files manual
 %defattr(644,root,root,755)
-%doc doc/*
+%doc manual/*
 
 %files javadoc
 %defattr(644,root,root,755)
