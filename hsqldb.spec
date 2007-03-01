@@ -1,7 +1,5 @@
-#
 # TODO
 # - make build with java 1.6
-# - separate server
 #
 # Conditional build:
 %bcond_without	binary		# do not use binary jar, but compile (needs java < 1.6)
@@ -11,7 +9,7 @@ Summary:	SQL relational database engine written in Java
 Summary(pl.UTF-8):	Silnik relacyjnych baz danych SQL napisany w Javie
 Name:		hsqldb
 Version:	1.8.0.7
-Release:	0.3
+Release:	0.4
 License:	BSD Style
 Group:		Development/Languages/Java
 Source0:	http://dl.sourceforge.net/hsqldb/%{name}_%{_ver}.zip
@@ -30,17 +28,8 @@ BuildRequires:	jpackage-utils >= 0:1.5
 BuildRequires:	junit
 BuildRequires:	rpmbuild(macros) >= 1.300
 BuildRequires:	servletapi4
-Requires(postun):	/usr/sbin/groupdel
-Requires(postun):	/usr/sbin/userdel
-Requires(pre):	/bin/id
-Requires(pre):	/usr/bin/getgid
-Requires(pre):	/usr/sbin/groupadd
-Requires(pre):	/usr/sbin/useradd
-Requires:	servletapi4
-Provides:	group(hsqldb)
-Provides:	user(hsqldb)
-Buildarch:	noarch
-Buildroot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+BuildArch:	noarch
+BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
 HSQLDB is the leading SQL relational database engine written in Java.
@@ -80,6 +69,7 @@ Podręcznik do HSQLDB.
 Summary:	Javadoc for HSQLDB
 Summary(pl.UTF-8):	Dokumentacja javadoc do HSQLDB
 Group:		Development/Languages/Java
+Requires:	package-utils
 
 %description javadoc
 Javadoc for HSQLDB.
@@ -98,6 +88,24 @@ Demonstrations and samples for HSQLDB.
 
 %description demo -l pl.UTF-8
 Programy demonstracyjne i przykładowe dla HSQLDB.
+
+%package server
+Summary:	HSQLDB server
+Group:		Applications/Databases
+Requires(postun):	/usr/sbin/groupdel
+Requires(postun):	/usr/sbin/userdel
+Requires(pre):	/bin/id
+Requires(pre):	/usr/bin/getgid
+Requires(pre):	/usr/sbin/groupadd
+Requires(pre):	/usr/sbin/useradd
+Requires:	%{name} = %{epoch}:%{version}-%{release}
+Requires:	servletapi4
+Provides:	group(hsqldb)
+Provides:	user(hsqldb)
+Conflicts:	%{name} < 1.8.0.7-0.4
+
+%description server
+HSQLDB server.
 
 %prep
 %setup -q -n %{name}
@@ -165,15 +173,15 @@ cp -a doc/src/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%pre
+%pre server
 %groupadd -g 169 %{name}
 %useradd -u 169 -g %{name} -s /bin/sh -d %{_localstatedir}/lib/%{name} %{name}
 
-%post
+%post server
 ln -sf $(build-classpath hsqldb) %{_localstatedir}/lib/%{name}/lib/hsqldb.jar
 ln -sf $(build-classpath servletapi4) %{_localstatedir}/lib/%{name}/lib/servlet.jar
 
-%preun
+%preun server
 if [ "$1" = "0" ]; then
 	rm -f %{_localstatedir}/lib/%{name}/lib/hsqldb.jar
 	rm -f %{_localstatedir}/lib/%{name}/lib/servlet.jar
@@ -194,14 +202,6 @@ fi
 %defattr(644,root,root,755)
 %doc doc/hsqldb_lic.txt
 %{_javadir}/*
-%attr(755,root,root) %{_bindir}/*
-%attr(754,root,root) /etc/rc.d/init.d/%{name}
-%config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/%{name}
-%attr(755,hsqldb,hsqldb) %{_localstatedir}/lib/%{name}/data
-%{_localstatedir}/lib/%{name}/lib
-%{_localstatedir}/lib/%{name}/server.properties
-%{_localstatedir}/lib/%{name}/webserver.properties
-%attr(600,hsqldb,hsqldb) %{_localstatedir}/lib/%{name}/sqltool.rc
 
 %files manual
 %defattr(644,root,root,755)
@@ -214,3 +214,14 @@ fi
 %files demo
 %defattr(644,root,root,755)
 %{_datadir}/%{name}
+
+%files server
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/*
+%attr(754,root,root) /etc/rc.d/init.d/%{name}
+%config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/%{name}
+%attr(755,hsqldb,hsqldb) %{_localstatedir}/lib/%{name}/data
+%{_localstatedir}/lib/%{name}/lib
+%{_localstatedir}/lib/%{name}/server.properties
+%{_localstatedir}/lib/%{name}/webserver.properties
+%attr(600,hsqldb,hsqldb) %{_localstatedir}/lib/%{name}/sqltool.rc
