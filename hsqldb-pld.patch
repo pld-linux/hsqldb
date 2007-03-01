@@ -1,5 +1,5 @@
---- hsqldb/bin/hsqldb	2007-03-02 00:22:17.468759551 +0200
-+++ hsqldb/bin/hsqldb	2007-03-02 00:28:05.686547133 +0200
+--- hsqldb/bin/hsqldb	2007-03-02 00:28:05.686547133 +0200
++++ hsqldb/bin/hsqldb	2007-03-02 00:30:46.810152595 +0200
 @@ -89,6 +89,8 @@
  
  #  -- blaine.simpson@admc.com
@@ -14,7 +14,7 @@
  [ -n "$INVOC_PATH" ] && INVOC_PATH="${INVOC_PATH}/"
  
 -SYNTAX_MSG="SYNTAX:  ${INVOC_PATH}hsqldb start|stop|stopcompact|restart|restartcmpacted|status"
-+SYNTAX_MSG="$0 start|stop|stopcompact|restart|restartcmpacted|status"
++SYNTAX_MSG="$0 {start|stop|stopcompact|restart|restartcmpacted|status}"
  
  # You can override any of these default values in your config file:
  
@@ -147,8 +147,9 @@
      ;;
      *)
 -        echo "$SYNTAX_MSG" 1>&2
+-        exit 5
 +        msg_usage "$SYNTAX_MSG"
-         exit 5
++        exit 3
      ;;
  esac
 +
