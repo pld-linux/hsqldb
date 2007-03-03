@@ -23,11 +23,13 @@ Patch1:		%{name}-pld.patch
 URL:		http://www.hsqldb.org/
 BuildRequires:	ant
 BuildRequires:	jdk
-%{!?with_binary:BuildRequires:	jdk < 1.6}
 BuildRequires:	jpackage-utils >= 0:1.5
-BuildRequires:	junit
 BuildRequires:	rpmbuild(macros) >= 1.300
+%if %{without binary}
+BuildRequires:	jdk < 1.6
+BuildRequires:	junit
 BuildRequires:	servletapi4
+%endif
 BuildArch:	noarch
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -123,7 +125,9 @@ rm -rf manual/src
 cp -a index.html manual
 
 %build
-export CLASSPATH=$(build-classpath \
+export CLASSPATH=\
+%if %{without binary}
+$(build-classpath \
 	jsse/jsse \
 	jsse/jnet \
 	jsse/jcert \
@@ -131,6 +135,8 @@ export CLASSPATH=$(build-classpath \
 	servletapi4 \
 	junit \
 )
+%endif
+
 cd build
 %ant %{!?with_binary:jar} javadoc
 
