@@ -6,10 +6,10 @@
 #
 %define		_ver	%(echo %{version} | tr . _)
 Summary:	SQL relational database engine written in Java
-Summary(pl.UTF-8):	Silnik relacyjnych baz danych SQL napisany w Javie
+Summary(pl):	Silnik relacyjnych baz danych SQL napisany w Javie
 Name:		hsqldb
 Version:	1.8.0.7
-Release:	0.6
+Release:	1
 License:	BSD Style
 Group:		Development/Languages/Java
 Source0:	http://dl.sourceforge.net/hsqldb/%{name}_%{_ver}.zip
@@ -43,51 +43,51 @@ Additionally, it includes tools such as a minimal web server,
 in-memory query and management tools (can be run as applets) and a
 number of demonstration examples.
 
-%description -l pl.UTF-8
-HSQLDB to wiodÄ…cy silnik relacyjnych baz danych SQL napisany w Javie.
-Ma sterownik JDBC i obsÅ‚uguje znaczny podzbiÃ³r ANSI-92 SQL (w formacie
-drzew BNF) oraz rozszerzenia SQL 99 i 2003. Oferuje maÅ‚y (poniÅ¼ej 100k
-w jednej wersji dla apletÃ³w), szybki silnik obsÅ‚ugujÄ…cy tabele zarÃ³wno
-w pamiÄ™ci, jak i na dysku; obsÅ‚uguje tryb wbudowany oraz serwerowy.
+%description -l pl
+HSQLDB to wiod±cy silnik relacyjnych baz danych SQL napisany w Javie.
+Ma sterownik JDBC i obs³uguje znaczny podzbiór ANSI-92 SQL (w formacie
+drzew BNF) oraz rozszerzenia SQL 99 i 2003. Oferuje ma³y (poni¿ej 100k
+w jednej wersji dla apletów), szybki silnik obs³uguj±cy tabele zarówno
+w pamiêci, jak i na dysku; obs³uguje tryb wbudowany oraz serwerowy.
 
-Ponadto zawiera narzÄ™dzia takie jak minimalny serwer WWW, zapytania w
-pamiÄ™ci i narzÄ™dzia zarzÄ…dzajÄ…ce (mogÄ…ce dziaÅ‚aÄ‡ jako aplety) oraz
-wiele przykÅ‚adÃ³w demonstracyjnych.
+Ponadto zawiera narzêdzia takie jak minimalny serwer WWW, zapytania w
+pamiêci i narzêdzia zarz±dzaj±ce (mog±ce dzia³aæ jako aplety) oraz
+wiele przyk³adów demonstracyjnych.
 
 %package manual
 Summary:	Manual for HSQLDB
-Summary(pl.UTF-8):	PodrÄ™cznik do HSQLDB
+Summary(pl):	Podrêcznik do HSQLDB
 Group:		Development/Languages/Java
 
 %description manual
 Documentation for HSQLDB.
 
-%description manual -l pl.UTF-8
-PodrÄ™cznik do HSQLDB.
+%description manual -l pl
+Podrêcznik do HSQLDB.
 
 %package javadoc
 Summary:	Javadoc for HSQLDB
-Summary(pl.UTF-8):	Dokumentacja javadoc do HSQLDB
+Summary(pl):	Dokumentacja javadoc do HSQLDB
 Group:		Development/Languages/Java
 Requires:	package-utils
 
 %description javadoc
 Javadoc for HSQLDB.
 
-%description javadoc -l pl.UTF-8
+%description javadoc -l pl
 Dokumentacja javadoc do HSQLDB.
 
 %package demo
 Summary:	Demo for HSQLDB
-Summary(pl.UTF-8):	Pliki demonstracyjne dla HSQLDB
+Summary(pl):	Pliki demonstracyjne dla HSQLDB
 Group:		Development/Languages/Java
 Requires:	%{name} = %{epoch}:%{version}-%{release}
 
 %description demo
 Demonstrations and samples for HSQLDB.
 
-%description demo -l pl.UTF-8
-Programy demonstracyjne i przykÅ‚adowe dla HSQLDB.
+%description demo -l pl
+Programy demonstracyjne i przyk³adowe dla HSQLDB.
 
 %package server
 Summary:	HSQLDB server
