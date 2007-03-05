@@ -9,7 +9,7 @@ Summary:	SQL relational database engine written in Java
 Summary(pl):	Silnik relacyjnych baz danych SQL napisany w Javie
 Name:		hsqldb
 Version:	1.8.0.7
-Release:	2
+Release:	3
 License:	BSD Style
 Group:		Development/Languages/Java
 Source0:	http://dl.sourceforge.net/hsqldb/%{name}_%{_ver}.zip
@@ -72,7 +72,7 @@ Podrêcznik do HSQLDB.
 Summary:	Javadoc for HSQLDB
 Summary(pl):	Dokumentacja javadoc do HSQLDB
 Group:		Development/Languages/Java
-Requires:	package-utils
+Requires:	jpackage-utils
 
 %description javadoc
 Javadoc for HSQLDB.
