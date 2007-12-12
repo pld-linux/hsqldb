@@ -2,11 +2,11 @@
 # - make build with java 1.6
 #
 # Conditional build:
-%bcond_with	binary		# do not use binary jar, but compile (needs java < 1.6)
+%bcond_with	binary		# use binary jar instead of compiling (which needs java < 1.6)
 
 %define java_version %(IFS=.; set -- $(%java -fullversion 2>&1 | grep -o '".*"' | xargs); echo "$1.$2")
 %if "%{java_version}" >= "1.6"
-%define	with_binary 1
+%define	with_binary	1
 %endif
 
 %define		ver	%(echo %{version} | tr . _)
@@ -16,7 +16,7 @@ Summary(pl.UTF-8):	Silnik relacyjnych baz danych SQL napisany w Javie
 Name:		hsqldb
 Version:	1.8.0.8
 Release:	2
-License:	BSD Style
+License:	BSD-like
 Group:		Development/Languages/Java
 Source0:	http://dl.sourceforge.net/hsqldb/%{name}_%{ver}.zip
 # Source0-md5:	f2539f9992430e20dfc1c31e712f29dd
@@ -91,7 +91,7 @@ Dokumentacja javadoc do HSQLDB.
 Summary:	Demo for HSQLDB
 Summary(pl.UTF-8):	Pliki demonstracyjne dla HSQLDB
 Group:		Development/Languages/Java
-Requires:	%{name} = %{epoch}:%{version}-%{release}
+Requires:	%{name} = %{version}-%{release}
 
 %description demo
 Demonstrations and samples for HSQLDB.
@@ -101,6 +101,7 @@ Programy demonstracyjne i przykładowe dla HSQLDB.
 
 %package server
 Summary:	HSQLDB server
+Summary(pl.UTF-8):	Serwer HSQLDB
 Group:		Applications/Databases
 Requires(post,preun):	/sbin/chkconfig
 Requires(postun):	/usr/sbin/groupdel
@@ -109,15 +110,18 @@ Requires(pre):	/bin/id
 Requires(pre):	/usr/bin/getgid
 Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
-Requires:	%{name} = %{epoch}:%{version}-%{release}
+Requires:	%{name} = %{version}-%{release}
 Requires:	rc-scripts
 Requires:	servlet >= 4
 Provides:	group(hsqldb)
 Provides:	user(hsqldb)
-Conflicts:	%{name} < 1.8.0.7-0.4
+Conflicts:	hsqldb < 1.8.0.7-0.4
 
 %description server
 HSQLDB server.
+
+%description server -l pl.UTF-8
+Serwer HSQLDB.
 
 %prep
 %setup -q -n %{name}
