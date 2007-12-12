@@ -2,17 +2,23 @@
 # - make build with java 1.6
 #
 # Conditional build:
-%bcond_without	binary		# do not use binary jar, but compile (needs java < 1.6)
-#
-%define		_ver	%(echo %{version} | tr . _)
+%bcond_with	binary		# do not use binary jar, but compile (needs java < 1.6)
+
+%define java_version %(IFS=.; set -- $(%java -fullversion 2>&1 | grep -o '".*"' | xargs); echo "$1.$2")
+%if "%{java_version}" >= "1.6"
+%define	with_binary 1
+%endif
+
+%define		ver	%(echo %{version} | tr . _)
+%include	/usr/lib/rpm/macros.java
 Summary:	SQL relational database engine written in Java
 Summary(pl.UTF-8):	Silnik relacyjnych baz danych SQL napisany w Javie
 Name:		hsqldb
 Version:	1.8.0.8
-Release:	1
+Release:	2
 License:	BSD Style
 Group:		Development/Languages/Java
-Source0:	http://dl.sourceforge.net/hsqldb/%{name}_%{_ver}.zip
+Source0:	http://dl.sourceforge.net/hsqldb/%{name}_%{ver}.zip
 # Source0-md5:	f2539f9992430e20dfc1c31e712f29dd
 Source1:	%{name}-standard.cfg
 Source2:	%{name}-standard-server.properties
@@ -20,18 +26,19 @@ Source3:	%{name}-standard-webserver.properties
 Source4:	%{name}-standard-sqltool.rc
 Patch0:		%{name}-scripts.patch
 Patch1:		%{name}-pld.patch
+Patch2:		%{name}-javadoc.patch
 URL:		http://www.hsqldb.org/
 BuildRequires:	ant
+BuildRequires:	sed >= 4.0
 BuildRequires:	jdk
 BuildRequires:	jpackage-utils >= 0:1.5
 BuildRequires:	rpmbuild(macros) >= 1.300
 %if %{without binary}
 BuildRequires:	jdk < 1.6
 BuildRequires:	junit
-BuildRequires:	servletapi4
+BuildRequires:	servlet >= 4
 %endif
 BuildArch:	noarch
-ExclusiveArch:	i586 i686 pentium3 pentium4 athlon %{x8664} noarch
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -60,7 +67,7 @@ wiele przykładów demonstracyjnych.
 %package manual
 Summary:	Manual for HSQLDB
 Summary(pl.UTF-8):	Podręcznik do HSQLDB
-Group:		Development/Languages/Java
+Group:		Documentation
 
 %description manual
 Documentation for HSQLDB.
@@ -71,7 +78,7 @@ Podręcznik do HSQLDB.
 %package javadoc
 Summary:	Javadoc for HSQLDB
 Summary(pl.UTF-8):	Dokumentacja javadoc do HSQLDB
-Group:		Development/Languages/Java
+Group:		Documentation
 Requires:	jpackage-utils
 
 %description javadoc
@@ -104,7 +111,7 @@ Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
 Requires:	%{name} = %{epoch}:%{version}-%{release}
 Requires:	rc-scripts
-Requires:	servletapi4
+Requires:	servlet >= 4
 Provides:	group(hsqldb)
 Provides:	user(hsqldb)
 Conflicts:	%{name} < 1.8.0.7-0.4
@@ -114,32 +121,35 @@ HSQLDB server.
 
 %prep
 %setup -q -n %{name}
+%{__sed} -i -e 's,\r$,,' build/build.xml
 %patch0 -p0
 %patch1 -p1
+%patch2 -p1
 
 # remove all binary libs
 %{!?with_binary:rm -f lib/hsqldb.jar}
 rm -f lib/servlet.jar
 
+# create manual dir without apidocs
 cp -a doc manual
 rm -rf manual/src
 cp -a index.html manual
 
 %build
-export CLASSPATH=\
+required_jars="\
 %if %{without binary}
-$(build-classpath \
 	jsse/jsse \
 	jsse/jnet \
 	jsse/jcert \
 	java/jdbc-stdext \
-	servletapi4 \
 	junit \
-)
 %endif
+	servlet \
+"
+CLASSPATH=$(build-classpath $required_jars)
+export CLASSPATH
 
-cd build
-%ant %{!?with_binary:jar} javadoc
+%ant -f build/build.xml %{!?with_binary:jar} javadoc
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -167,7 +177,7 @@ install %{SOURCE3} $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}/webserver.proper
 install %{SOURCE4} $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}/sqltool.rc
 # lib
 install -d $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}/lib
-install lib/functions 	$RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}/lib
+install lib/functions $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}/lib
 # data
 install -d $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}/data
 # demo
@@ -178,6 +188,7 @@ install demo/*.html 	$RPM_BUILD_ROOT%{_datadir}/%{name}/demo
 # javadoc
 install -d $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
 cp -a doc/src/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
+ln -s %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name} # ghost symlink
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -187,7 +198,7 @@ rm -rf $RPM_BUILD_ROOT
 %useradd -u 169 -g %{name} -s /bin/sh -d %{_localstatedir}/lib/%{name} %{name}
 
 %post server
-ln -sf $(build-classpath servletapi4) %{_localstatedir}/lib/%{name}/lib/servlet.jar
+ln -sf $(build-classpath servlet) %{_localstatedir}/lib/%{name}/lib/servlet.jar
 /sbin/chkconfig --add %{name}
 %service %{name} restart
 
@@ -205,18 +216,12 @@ if [ "$1" = "0" ]; then
 fi
 
 %post javadoc
-rm -f %{_javadocdir}/%{name}
-ln -s %{name}-%{version} %{_javadocdir}/%{name}
-
-%preun javadoc
-if [ "$1" = "0" ]; then
-	rm -f %{_javadocdir}/%{name}
-fi
+ln -nfs %{name}-%{version} %{_javadocdir}/%{name}
 
 %files
 %defattr(644,root,root,755)
 %doc doc/hsqldb_lic.txt
-%{_javadir}/*
+%{_javadir}/*.jar
 
 %files manual
 %defattr(644,root,root,755)
@@ -225,6 +230,7 @@ fi
 %files javadoc
 %defattr(644,root,root,755)
 %{_javadocdir}/%{name}-%{version}
+%ghost %{_javadocdir}/%{name}
 
 %files demo
 %defattr(644,root,root,755)
