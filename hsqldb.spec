@@ -14,12 +14,12 @@
 Summary:	SQL relational database engine written in Java
 Summary(pl.UTF-8):	Silnik relacyjnych baz danych SQL napisany w Javie
 Name:		hsqldb
-Version:	1.8.0.8
-Release:	3
+Version:	1.8.0.9
+Release:	1
 License:	BSD-like
 Group:		Development/Languages/Java
 Source0:	http://dl.sourceforge.net/hsqldb/%{name}_%{ver}.zip
-# Source0-md5:	f2539f9992430e20dfc1c31e712f29dd
+# Source0-md5:	c3f8010e3e2c73143eb702b7f28f0c8e
 Source1:	%{name}-standard.cfg
 Source2:	%{name}-standard-server.properties
 Source3:	%{name}-standard-webserver.properties
@@ -140,17 +140,17 @@ rm -rf manual/src
 cp -a index.html manual
 
 %build
-required_jars="\
 %if %{without binary}
+required_jars="\
 	jsse/jsse \
 	jsse/jnet \
 	jsse/jcert \
 	java/jdbc-stdext \
 	junit \
-%endif
 	servlet \
 "
 CLASSPATH=$(build-classpath $required_jars)
+%endif
 export CLASSPATH
 
 %ant -f build/build.xml %{!?with_binary:jar} javadoc
@@ -182,6 +182,7 @@ install %{SOURCE4} $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}/sqltool.rc
 # lib
 install -d $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}/lib
 install lib/functions $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}/lib
+ln -sf %{_javadir}/servlet.jar $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}/lib/servlet.jar
 # data
 install -d $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}/data
 # demo
@@ -202,7 +203,6 @@ rm -rf $RPM_BUILD_ROOT
 %useradd -u 169 -g %{name} -s /bin/sh -d %{_localstatedir}/lib/%{name} %{name}
 
 %post server
-ln -sf $(build-classpath servlet) %{_localstatedir}/lib/%{name}/lib/servlet.jar
 /sbin/chkconfig --add %{name}
 %service %{name} restart
 
@@ -214,7 +214,6 @@ fi
 
 %postun server
 if [ "$1" = "0" ]; then
-	rm -f %{_localstatedir}/lib/%{name}/lib/servlet.jar
 	%userremove %{name}
 	%groupremove %{name}
 fi
