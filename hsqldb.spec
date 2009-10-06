@@ -1,5 +1,8 @@
 # TODO
 # - make build with java 1.6
+# - init script for webserver
+# - pldized init script
+# - set value for Xmx in sysconfig. Default is too low to run hsqldb server.
 #
 # Conditional build:
 %bcond_with	binary		# use binary jar instead of compiling (which needs java < 1.6)
@@ -14,12 +17,12 @@
 Summary:	SQL relational database engine written in Java
 Summary(pl.UTF-8):	Silnik relacyjnych baz danych SQL napisany w Javie
 Name:		hsqldb
-Version:	1.8.0.9
-Release:	2
+Version:	1.8.1.1
+Release:	1
 License:	BSD-like
 Group:		Development/Languages/Java
 Source0:	http://dl.sourceforge.net/hsqldb/%{name}_%{ver}.zip
-# Source0-md5:	c3f8010e3e2c73143eb702b7f28f0c8e
+# Source0-md5:	4114ba2e6aba58e6bfd3fa283d7dbc37
 Source1:	%{name}-standard.cfg
 Source2:	%{name}-standard-server.properties
 Source3:	%{name}-standard-webserver.properties
@@ -36,7 +39,7 @@ BuildRequires:	rpmbuild(macros) >= 1.300
 %if %{without binary}
 BuildRequires:	jdk < 1.6
 BuildRequires:	java-junit
-BuildRequires:	java(servlet)
+BuildRequires:	java(Servlet)
 %endif
 BuildArch:	noarch
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -112,7 +115,7 @@ Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
 Requires:	%{name} = %{version}-%{release}
 Requires:	rc-scripts
-Requires:	java(servlet)
+Requires:	java(Servlet)
 Provides:	group(hsqldb)
 Provides:	user(hsqldb)
 
@@ -146,7 +149,7 @@ required_jars="\
 	jsse/jcert \
 	java/jdbc-stdext \
 	junit \
-	servlet \
+	servlet-api \
 "
 CLASSPATH=$(build-classpath $required_jars)
 %endif
@@ -181,7 +184,7 @@ install %{SOURCE4} $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}/sqltool.rc
 # lib
 install -d $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}/lib
 install lib/functions $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}/lib
-ln -sf %{_javadir}/servlet.jar $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}/lib/servlet.jar
+ln -sf %{_javadir}/servlet-api.jar $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}/lib/servlet.jar
 # data
 install -d $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}/data
 # demo
