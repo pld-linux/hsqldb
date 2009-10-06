@@ -1,3 +1,5 @@
+# TODO
+# - make build with java 1.6
 #
 # Conditional build:
 %bcond_with	binary		# use binary jar instead of compiling (which needs java < 1.6)
@@ -150,7 +152,7 @@ CLASSPATH=$(build-classpath $required_jars)
 %endif
 export CLASSPATH
 
-%ant -f build/build.xml %{!?with_binary:jar} javadoc
+%ant -f build/build.xml jar javadoc
 
 %install
 rm -rf $RPM_BUILD_ROOT
