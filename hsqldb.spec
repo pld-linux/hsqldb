@@ -1,5 +1,3 @@
-# TODO
-# - make build with java 1.6
 #
 # Conditional build:
 %bcond_with	binary		# use binary jar instead of compiling (which needs java < 1.6)
@@ -26,7 +24,7 @@ Source3:	%{name}-standard-webserver.properties
 Source4:	%{name}-standard-sqltool.rc
 Patch0:		%{name}-scripts.patch
 Patch1:		%{name}-pld.patch
-Patch2:		%{name}-javadoc.patch
+#Patch2:		%{name}-javadoc.patch
 URL:		http://www.hsqldb.org/
 BuildRequires:	ant
 BuildRequires:	sed >= 4.0
@@ -35,8 +33,8 @@ BuildRequires:	jpackage-utils >= 0:1.5
 BuildRequires:	rpmbuild(macros) >= 1.300
 %if %{without binary}
 BuildRequires:	jdk < 1.6
-BuildRequires:	junit
-BuildRequires:	servlet >= 4
+BuildRequires:	java-junit
+BuildRequires:	java(servlet)
 %endif
 BuildArch:	noarch
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -128,7 +126,7 @@ Serwer HSQLDB.
 %{__sed} -i -e 's,\r$,,' build/build.xml
 %patch0 -p0
 %patch1 -p1
-%patch2 -p1
+#%patch2 -p1
 
 # remove all binary libs
 %{!?with_binary:rm -f lib/hsqldb.jar}
