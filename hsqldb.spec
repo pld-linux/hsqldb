@@ -152,7 +152,7 @@ CLASSPATH=$(build-classpath $required_jars)
 %endif
 export CLASSPATH
 
-%ant -f build/build.xml jar javadoc
+%ant -f build/build.xml %{!?with_binary:jar} javadoc
 
 %install
 rm -rf $RPM_BUILD_ROOT
