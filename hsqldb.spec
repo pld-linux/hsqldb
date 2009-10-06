@@ -110,10 +110,9 @@ Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
 Requires:	%{name} = %{version}-%{release}
 Requires:	rc-scripts
-Requires:	servlet >= 4
+Requires:	java(servlet)
 Provides:	group(hsqldb)
 Provides:	user(hsqldb)
-Conflicts:	hsqldb < 1.8.0.7-0.4
 
 %description server
 HSQLDB server.
