@@ -1,0 +1,10 @@
+--- hsqldb/build/build.xml~	2007-08-09 12:20:11.000000000 +0300
++++ hsqldb/build/build.xml	2007-12-12 21:53:38.656541111 +0200
+@@ -761,7 +761,6 @@
+ 		   				${src}/org/hsqldb/util/RCData.java,
+ 		   				${src}/org/hsqldb/util/SqlTool.java"
+            destdir="${basedir}/doc/src"
+-           classpath="${basedir}/lib/servlet.jar;${basedir}/lib/junit.jar"
+            author="true"
+            version="false"
+            use="true"

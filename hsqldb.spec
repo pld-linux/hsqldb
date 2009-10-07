@@ -29,7 +29,7 @@ Source3:	%{name}-standard-webserver.properties
 Source4:	%{name}-standard-sqltool.rc
 Patch0:		%{name}-scripts.patch
 Patch1:		%{name}-pld.patch
-#Patch2:		%{name}-javadoc.patch
+Patch2:		%{name}-javadoc.patch
 URL:		http://www.hsqldb.org/
 BuildRequires:	ant
 BuildRequires:	sed >= 4.0
@@ -130,7 +130,7 @@ Serwer HSQLDB.
 %{__sed} -i -e 's,\r$,,' build/build.xml
 %patch0 -p0
 %patch1 -p1
-#%patch2 -p1
+%patch2 -p1
 
 # remove all binary libs
 %{!?with_binary:rm -f lib/hsqldb.jar}
