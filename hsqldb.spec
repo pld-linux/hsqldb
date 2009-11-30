@@ -33,14 +33,15 @@ Patch2:		%{name}-javadoc.patch
 URL:		http://www.hsqldb.org/
 BuildRequires:	ant
 BuildRequires:	sed >= 4.0
+%if %{without binary}
+BuildRequires:	java(Servlet)
+BuildRequires:	java-junit
+BuildRequires:	jdk < 1.6
+%endif
 BuildRequires:	jdk
 BuildRequires:	jpackage-utils >= 0:1.5
 BuildRequires:	rpmbuild(macros) >= 1.300
-%if %{without binary}
-BuildRequires:	jdk < 1.6
-BuildRequires:	java-junit
-BuildRequires:	java(Servlet)
-%endif
+BuildRequires:	unzip
 BuildArch:	noarch
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -114,8 +115,8 @@ Requires(pre):	/usr/bin/getgid
 Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
 Requires:	%{name} = %{version}-%{release}
-Requires:	rc-scripts
 Requires:	java(Servlet)
+Requires:	rc-scripts
 Provides:	group(hsqldb)
 Provides:	user(hsqldb)
 
