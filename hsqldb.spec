@@ -3,14 +3,9 @@
 # - init script for webserver
 # - pldized init script
 # - set value for Xmx in sysconfig. Default is too low to run hsqldb server.
-#
-# Conditional build:
-%bcond_with	binary		# use binary jar instead of compiling (which needs java < 1.6)
 
-%define java_version %(IFS=.; set -- $(%java -fullversion 2>&1 | grep -o '".*"' | xargs); echo "$1.$2")
-%if "%{java_version}" >= "1.6"
-%define	with_binary	1
-%endif
+# does not build with java >= 1.6
+%define	use_jdk	java5-sun
 
 %define		ver	%(echo %{version} | tr . _)
 %include	/usr/lib/rpm/macros.java
@@ -20,8 +15,8 @@ Name:		hsqldb
 Version:	1.8.1.1
 Release:	1
 License:	BSD-like
-Group:		Development/Languages/Java
-Source0:	http://dl.sourceforge.net/hsqldb/%{name}_%{ver}.zip
+Group:		Libraries/Java
+Source0:	http://downloads.sourceforge.net/hsqldb/%{name}_%{ver}.zip
 # Source0-md5:	4114ba2e6aba58e6bfd3fa283d7dbc37
 Source1:	%{name}-standard.cfg
 Source2:	%{name}-standard-server.properties
@@ -33,14 +28,11 @@ Patch2:		%{name}-javadoc.patch
 URL:		http://www.hsqldb.org/
 BuildRequires:	ant
 BuildRequires:	sed >= 4.0
-%if %{without binary}
-BuildRequires:	java(Servlet)
+BuildRequires:	java(servlet)
 BuildRequires:	java-junit
-BuildRequires:	jdk < 1.6
-%endif
-BuildRequires:	jdk
+%{buildrequires_jdk}
 BuildRequires:	jpackage-utils >= 0:1.5
-BuildRequires:	rpmbuild(macros) >= 1.300
+BuildRequires:	rpmbuild(macros) >= 1.553
 BuildRequires:	unzip
 BuildArch:	noarch
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -115,7 +107,7 @@ Requires(pre):	/usr/bin/getgid
 Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
 Requires:	%{name} = %{version}-%{release}
-Requires:	java(Servlet)
+Requires:	java(servlet)
 Requires:	rc-scripts
 Provides:	group(hsqldb)
 Provides:	user(hsqldb)
@@ -128,13 +120,13 @@ Serwer HSQLDB.
 
 %prep
 %setup -q -n %{name}
-%{__sed} -i -e 's,\r$,,' build/build.xml
+%undos build/build.xml
 %patch0 -p0
 %patch1 -p1
 %patch2 -p1
 
 # remove all binary libs
-%{!?with_binary:rm -f lib/hsqldb.jar}
+rm -f lib/hsqldb.jar
 rm -f lib/servlet.jar
 
 # create manual dir without apidocs
@@ -143,20 +135,19 @@ rm -rf manual/src
 cp -a index.html manual
 
 %build
-%if %{without binary}
 required_jars="\
 	jsse/jsse \
 	jsse/jnet \
 	jsse/jcert \
-	java/jdbc-stdext \
+	jdbc-stdext \
 	junit \
 	servlet-api \
 "
+export JAVA_HOME=%{java_home}
 CLASSPATH=$(build-classpath $required_jars)
-%endif
 export CLASSPATH
 
-%ant -f build/build.xml %{!?with_binary:jar} javadoc
+%ant -f build/build.xml hsqldb javadoc
 
 %install
 rm -rf $RPM_BUILD_ROOT
