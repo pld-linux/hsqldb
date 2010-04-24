@@ -32,7 +32,7 @@ BuildRequires:	java(servlet)
 BuildRequires:	java-junit
 %{buildrequires_jdk}
 BuildRequires:	jpackage-utils >= 0:1.5
-BuildRequires:	rpmbuild(macros) >= 1.553
+BuildRequires:	rpmbuild(macros) >= 1.556
 BuildRequires:	unzip
 BuildArch:	noarch
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
